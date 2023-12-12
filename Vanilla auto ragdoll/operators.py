@@ -28,17 +28,19 @@ class RagdollFromVGroupsOperator(bpy.types.Operator):
     hide_original_mesh: bpy.props.BoolProperty(name='Hide the original mesh in the viewport')
     remesh: bpy.props.BoolProperty(name='Remesh', default=True,
                                    description='Enable this to remesh the isolated vertex groups. '
-                                               'Remeshed ragdoll segments should be more stable when used as rigid '
+                                               'Remeshed ragdoll segments are usually more stable when used as rigid '
                                                'bodies since they represent the volume of the original mesh while '
                                                'removing poor geometry')
     voxel_size: bpy.props.FloatProperty(name='Voxel size for the remeshed colliders', min=0.0001, default=0.1,
                                         precision=4, step=1,
                                         description='Lower this value for better representation of the original mesh. '
-                                                    'Setting low values (around 0.001) may result in blender crashing')
+                                                    'Setting low values (around 0.001) may result in blender freezing '
+                                                    'and even crashing')
     collision_shape: bpy.props.EnumProperty(name='Collider shape',
                                             description='The shape used for ragdoll segments\' colliders'
-                                                        'Mesh shape is more computationally heavy, allows more '
-                                                        'complex geometry but works bad with poor geometry',
+                                                        'Mesh shape is more computationally heavy. It allows more '
+                                                        'complex geometry but performs poorly if the mesh is '
+                                                        'unoptimised',
                                             items=[('CONVEX_HULL', 'Convex hull', ''),
                                                    ('MESH', 'Mesh', '')])
 

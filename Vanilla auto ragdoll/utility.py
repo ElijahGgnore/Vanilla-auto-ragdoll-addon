@@ -28,8 +28,12 @@ def isolate_vertex_group(mesh, vgroup_index, threshold=0.9):
     bm.free()
     mesh.update()
 
+
 # TODO: Documentation
 def delete_loose(mesh):
+    """
+    Deletes loose vertices in the provided mesh
+    """
     bm = bmesh.new()
     bm.from_mesh(mesh)
     verts = [v for v in bm.verts if not v.link_faces]
@@ -40,12 +44,11 @@ def delete_loose(mesh):
     bm.clear()
 
 
-def apply_modifiers(obj):
-    obj.data = obj.to_mesh()
-    obj.modifiers.clear()
-
-
 def bone_center_matrix(bone):
+    """
+    :returns: the matrix representing the position of the
+    bone's center (the point between the bone's head and tail)
+    """
     return bone.matrix_local @ Matrix.Translation((0, bone.length / 2, 0))
 
 

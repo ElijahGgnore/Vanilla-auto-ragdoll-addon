@@ -142,7 +142,7 @@ class SimpleRagdoll(BaseRagdoll):
             bpy.ops.rigidbody.object_add(type='ACTIVE')
             segment.rigid_body.collision_shape = self.segment_shape
 
-            # create and rotate an empty to align y-axis of the bone to z-axis of the segment mesh.
+            # This block of code creates and rotates an empty to align y-axis of the bone to z-axis of the segment mesh.
             # it would be nice to have an 'add rotation constraint'
             # or some 'offset by rotation' option in the copy rotation constraint.
             if pose_bone.parent:
@@ -200,6 +200,7 @@ class RagdollFromVGroups(BaseRagdoll):
             # Align the bone segment with its corresponding bone
             transform_origin(segment, segment.rotation_quaternion.to_matrix().to_4x4() @
                              bone_center_matrix(pose_bone.bone))
+
             delete_loose(segment.data)
             if self.remesh:
                 remesh_mod = segment.modifiers.new(name="Remesh", type='REMESH')

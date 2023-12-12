@@ -10,7 +10,7 @@ bl_info = {
     "category": "Object",
 }
 
-# reload all submodules
+# This code block reloads all the submodules
 submodules = [v for k, v in sys.modules.items() if k.startswith(__name__)]
 for submodule in submodules:
     reload(submodule)
