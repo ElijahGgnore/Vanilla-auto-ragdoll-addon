@@ -79,3 +79,20 @@ def offset_empty(obj, offset: Matrix, bone=None):
     return empty
 
 
+def scripted_driver_add(struct, property_path, index=-1, expression=''):
+    fcurve = struct.driver_add(property_path, index)
+    driver = fcurve.driver
+    driver.type = 'SCRIPTED'
+    driver.expression = expression
+    return driver
+
+
+def driver_object_var_add(driver, obj_id, prop_name):
+    var_name = prop_name.replace(' ', '_')
+    driver.expression = var_name
+    var = driver.variables.new()
+    var.name = var_name
+    var.targets[0].id_type = 'OBJECT'
+    var.targets[0].id = obj_id
+    var.targets[0].data_path = f'["{prop_name}"]'
+    return var

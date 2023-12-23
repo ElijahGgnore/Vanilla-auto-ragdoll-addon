@@ -4,7 +4,7 @@ import bpy
 from math import radians
 from mathutils import Matrix, Quaternion, Euler
 from .utility import select_single, isolate_vertex_group, transform_origin, offset_empty, bone_center_matrix, \
-    delete_loose
+    delete_loose, scripted_driver_add, driver_object_var_add
 from typing import Literal  # Note: PEP 586 - Literal types
 
 
@@ -23,9 +23,17 @@ class RagdollSegment:
 class BaseRagdoll:
     def __init__(self, context, armature):
         self.armature = armature
+
         if self.armature.type != 'ARMATURE':
             raise AutoRagdollError(
-                f'"{armature.name}" type is "{armature.type}". Select an armature object and try again')
+                f'The type object type of "{armature.name}" is "{armature.type}". '
+                f'Select an armature object and try again')
+
+        self.ragdoll_enabled_prop_name = 'Ragdoll enabled'
+        self.armature[self.ragdoll_enabled_prop_name] = True
+        enabled = self.armature.id_properties_ui(self.ragdoll_enabled_prop_name)
+        enabled.update(default=True, description='Ragdoll enabled state')
+
         self.armature.data.pose_position = 'REST'
         self.segments = set()
         self.ragdoll_collection = bpy.data.collections.new(f'{self.armature.name} ragdoll')
@@ -34,8 +42,10 @@ class BaseRagdoll:
         self.ragdoll_collection.children.link(self.segment_collection)
         self.ragdoll_collection.children.link(self.joint_collection)
         context.scene.collection.children.link(self.ragdoll_collection)
+
         self.create_segments()
         self.connect_segments()
+
         self.armature.data.pose_position = 'POSE'
         select_single(self.armature)
 
@@ -53,6 +63,10 @@ class BaseRagdoll:
                 copy_rotation_constraint.target = empty
             else:
                 copy_rotation_constraint.target = segment
+
+            driver = scripted_driver_add(copy_rotation_constraint, 'influence')
+            var = driver_object_var_add(driver, self.armature, self.ragdoll_enabled_prop_name)
+            driver.expression = var.name
         else:
             child_of_constraint = pose_bone.constraints.new('CHILD_OF')
             child_of_constraint.target = segment
@@ -60,6 +74,10 @@ class BaseRagdoll:
             child_of_constraint.use_scale_x = False
             child_of_constraint.use_scale_y = False
             child_of_constraint.use_scale_z = False
+
+            driver = scripted_driver_add(child_of_constraint, 'influence')
+            var = driver_object_var_add(driver, self.armature, self.ragdoll_enabled_prop_name)
+            driver.expression = var.name
 
         self.segments.add(RagdollSegment(segment, pose_bone))
 
@@ -84,7 +102,8 @@ class BaseRagdoll:
                         constraint.object2 = child_segment.obj
                         constraint.disable_collisions = False
 
-                        # set the location and rotation limits
+                        # This block of code sets the location and rotation limits
+                        # allowing the colliders to only rotate and not move
                         constraint.use_limit_ang_x = True
                         constraint.use_limit_ang_y = True
                         constraint.use_limit_ang_z = True
