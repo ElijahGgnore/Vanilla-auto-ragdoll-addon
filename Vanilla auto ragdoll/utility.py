@@ -61,15 +61,21 @@ def transform_origin(obj, transformation: Matrix):
     obj.data.transform(transformation.inverted())
 
 
-def offset_empty(obj, offset: Matrix):
+def offset_empty(obj, offset: Matrix, bone=None):
     """
     This is a workaround for constraints like 'copy rotation' where there is no offset option.
     :offset: Local matrix for the created empty.
-    :returns: An empty object parented to the specified one. In a constraint it should be assigned as target
-    and used as an offset.
+    :bone: Optional bone name. The empty's parenting type becomes 'BONE' If some name is specified.
+    :returns: An empty object parented to the specified object or bone. In a constraint it should be assigned as target
+    and used to offset whatever transformation is being done.
     """
     empty = bpy.data.objects.new(f'{obj.name} offset empty', None)
     empty.empty_display_type = 'SINGLE_ARROW'
     empty.parent = obj
+    if bone:
+        empty.parent_bone = bone
+        empty.parent_type = 'BONE'
     empty.matrix_local = offset
     return empty
+
+
